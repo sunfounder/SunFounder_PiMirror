@@ -1,0 +1,100 @@
+#!/bin/bash
+
+echo "╔═══════════════════════════════════════════╗"
+echo "║ ╔════╗       ╔═══╗             ╔═╗        ║"
+echo "║ ║╔═╗ ║       ║╔══╝             ║ ║        ║"
+echo "║ ║╚═══╦╗╔═╦═══╣╚══╦═══╦╗╔═╦═══╦═╝ ╠═══╦══╗ ║"
+echo "║ ╚══╗ ║║║ ║╔╗ ║╔══╣╔╗ ║║║ ║╔╗ ║╔╗ ║ ══╣╔═╝ ║"
+echo "║ ║╚═╝ ║╚╝ ║║║ ║║  ║╚╝ ║╚╝ ║║║ ║╚╝ ║ ══╣║   ║"
+echo "║ ╚════╩═══╩╝╚═╩╝  ╚═══╩═══╩╝╚═╩═══╩═══╩╝   ║"
+echo "╚═══════════════════════════════════════════╝"
+echo ''
+echo "       ╔════════════════════════════╗"
+echo "       ║ Mirror installation script ║"
+echo "       ╚════════════════════════════╝"
+echo ''
+sleep 2s
+
+function substr {
+    STRING_A=$1
+    STRING_B=$2
+
+    if [[ ${STRING_A/${STRING_B}//} == $STRING_A ]]
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# install google assistant
+echo "!! Make sure you have finished creating project"
+echo "and get the client secrets downloaded, or the following"
+echo "might failed. Contiune? (Y/n)"
+read confirm
+if [ "$confirm" == "y" ] || [ "$confirm" == "Y" ]; then
+    echo "OK! Move on."
+else
+    echo "OK! Bye~"
+fi
+
+sleep 1s
+echo "Install google assistant."
+echo "┗━ Install setuptools for python3 "
+echo "   ┗━ sudo python3 -m pip install --upgrade pip setuptools"
+sudo python3 -m pip install --upgrade pip setuptools
+echo ''
+echo "┗━ Install google-assistant-library"
+echo "   ┗━ sudo python3 -m pip install --upgrade google-assistant-library"
+sudo python3 -m pip install --upgrade google-assistant-library
+echo ''
+echo "┗━ Install authorization tool"
+echo "   ┗━ sudo python3 -m pip install --upgrade google-auth-oauthlib[tool]"
+sudo python3 -m pip install --upgrade google-auth-oauthlib[tool]
+echo ''
+echo "┗━ Authorize google account"
+echo "   ┗━ google-oauthlib-tool --client-secrets /home/pi/client_secret_client-id.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless"
+google-oauthlib-tool --client-secrets /home/pi/client_secret_client-id.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+
+echo ''
+echo "Install feedparser."
+echo "┗━ sudo python3 -m pip install feedparser"
+sudo python3 -m pip install feedparser
+
+echo ''
+echo "Install Install pil.imagetk."
+echo "┗━ sudo apt-get install python3-pil.imagetk"
+sudo apt-get install python3-pil.imagetk -y
+samba_config="\
+[Mirror]\n\
+    comment = For SunFounder Mirror's screensavers and configs\n\
+    path = /home/pi/SunFounder_Mirror/samba_files/\n\
+    browseable = yes\n\
+    writeable = yes\n\
+    public = yes\n\
+    create mask = 0777\n\
+    directory mask = 0777\n"
+echo ''
+echo "Install samba."
+echo "┗━ sudo apt-get install samba"
+sudo apt-get install samba -y
+echo "┗━ Setup"
+egrep -v "^#|^$" /etc/samba/smb.conf > smb.conf.temp  # pick up all uncomment configrations
+if grep -q '[PiMirror]' smb.conf.temp; then  # whether Mirror in uncomment configrations or not
+    echo '   ┗━ Seem Mirror is already set, skip'
+else
+    echo $samba_config >> /etc/samba/smb.conf
+fi
+echo '   ┗━ cleanup'
+sudo rm smb.conf.temp
+
+echo ''
+echo "Setup autostart"
+egrep -v "^#|^$" /home/pi/.config/lxsession/LXDE-pi/autostart > autostart.temp  # pick up all uncomment configrations
+if grep -q 'SunFounder_PiMirror/pimirror/watchdog' autostart.temp; then  # whether Mirror in uncomment configrations or not
+    echo '   ┗━ Seem PiMirror autostart is already set, skip\n'
+else
+    echo '/home/pi/SunFounder_PiMirror/pimirror/watchdog' >> /home/pi/.config/lxsession/LXDE-pi/autostart
+fi
+echo '   ┗━ cleanup'
+sudo rm autostart.temp

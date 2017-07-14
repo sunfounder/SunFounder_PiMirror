@@ -1,0 +1,46 @@
+news_mount = 5
+
+infomation_timeout = 30
+
+random_delay = 20
+
+screensaver = RANDOM
+
+screensaver_default = 2.jpg
+
+time_format = 12
+
+date_format = %b %d, %Y
+
+weather_api_token = c2c387eeab5fbb1818b249079006633f
+
+weather_lang = en
+
+weather_unit = auto
+
+xlarge_text_size = 40
+
+large_text_size = 30
+
+medium_text_size = 22
+
+small_text_size = 18
+
+city = Shenzhen
+
+region = 44
+
+regionName = Guangdong
+
+country = China
+
+countryCode = cn
+
+lat = 22.5333
+
+lon = 114.1333
+
+ip = 116.24.217.163
+
+timezone = Asia/Shanghai
+
