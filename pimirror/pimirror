@@ -1,6 +1,6 @@
 #!/bin/bash
 
-program_name='pimirror.py'
+program_name='main.py'
 program_dir='/home/pi/SunFounder_PiMirror/pimirror/'
 program_command="python3 "$program_dir$program_name" > /dev/null 2>&1 &"
 
@@ -8,7 +8,7 @@ pid=0
 
 function start {
 	echo 'Program starting...'
-	/home/pi/SunFounder_PiMirror/pimirror/pimirror.py > /dev/null 2>&1 &
+	/home/pi/SunFounder_PiMirror/pimirror/main.py > /dev/null 2>&1 &
 	get_pid
 	echo 'Done, pid: '$pid
 }
@@ -21,8 +21,8 @@ function stop {
 }
 
 function get_pid {
-	program=`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/pimirror.py' | awk '{ print $11 }'`
-	temp_pid=`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/pimirror.py' | awk '{ print $2 }'`
+	program=`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py' | awk '{ print $11 }'`
+	temp_pid=`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py' | awk '{ print $2 }'`
 	if [ "$program" == "python3" ]; then
 		pid=$temp_pid
 	else
@@ -36,7 +36,7 @@ do
 	get_pid
 	if [ "$pid" == 0 ]; then
 		echo 'Program stops. Restarting...'
-		echo '[DEBUG] '`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/pimirror.py'`
+		echo '[DEBUG] '`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py'`
 		start
 	#else
 	#	echo 'Program running at pid: '$pid

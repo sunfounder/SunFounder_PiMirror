@@ -53,8 +53,8 @@ echo "   ┗━ sudo python3 -m pip install --upgrade google-auth-oauthlib[tool]
 sudo python3 -m pip install --upgrade google-auth-oauthlib[tool]
 echo ''
 echo "┗━ Authorize google account"
-echo "   ┗━ google-oauthlib-tool --client-secrets /home/pi/client_secret_client-id.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless"
-google-oauthlib-tool --client-secrets /home/pi/client_secret_client-id.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+echo "   ┗━ google-oauthlib-tool --client-secrets /home/pi/client_secret.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless"
+google-oauthlib-tool --client-secrets /home/pi/client_secret.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 echo ''
 echo "Install feedparser."
@@ -66,9 +66,9 @@ echo "Install Install pil.imagetk."
 echo "┗━ sudo apt-get install python3-pil.imagetk"
 sudo apt-get install python3-pil.imagetk -y
 samba_config="\
-[Mirror]\n\
-    comment = For SunFounder Mirror's screensavers and configs\n\
-    path = /home/pi/SunFounder_Mirror/samba_files/\n\
+[PiMirror]\n\
+    comment = For SunFounder PiMirror's screensavers and configs\n\
+    path = /home/pi/SunFounder_PiMirror/samba_files/\n\
     browseable = yes\n\
     writeable = yes\n\
     public = yes\n\
@@ -94,7 +94,7 @@ egrep -v "^#|^$" /home/pi/.config/lxsession/LXDE-pi/autostart > autostart.temp  
 if grep -q 'SunFounder_PiMirror/pimirror/watchdog' autostart.temp; then  # whether Mirror in uncomment configrations or not
     echo '   ┗━ Seem PiMirror autostart is already set, skip\n'
 else
-    echo '/home/pi/SunFounder_PiMirror/pimirror/watchdog' >> /home/pi/.config/lxsession/LXDE-pi/autostart
+    echo '@/home/pi/SunFounder_PiMirror/pimirror/watchdog' >> /home/pi/.config/lxsession/LXDE-pi/autostart
 fi
 echo '   ┗━ cleanup'
 sudo rm autostart.temp

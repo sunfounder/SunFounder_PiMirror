@@ -636,7 +636,7 @@ class Status_Handler(object):
         mirror.news.is_detail_displayed = False
         self.random_timer_stop()
 
-conf = filedb.fileDB(db=CODE_DIR+'samba_files/config')
+conf = filedb.fileDB(db=CODE_DIR+'samba_files/config.txt')
 
 def main():
     global mirror, google_assistant, status_handler
