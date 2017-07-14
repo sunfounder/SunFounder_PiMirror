@@ -65,6 +65,7 @@ echo ''
 echo "Install Install pil.imagetk."
 echo "┗━ sudo apt-get install python3-pil.imagetk"
 sudo apt-get install python3-pil.imagetk -y
+
 samba_config="\
 [PiMirror]\n\
     comment = For SunFounder PiMirror's screensavers and configs\n\
@@ -98,3 +99,25 @@ else
 fi
 echo '   ┗━ cleanup'
 sudo rm autostart.temp
+
+mic_speaker_config="\
+pcm.!default {\n\
+  type asym\n\
+  capture.pcm \"mic\"\n\
+  playback.pcm \"speaker\"\n\
+}\n\
+pcm.mic {\n\
+  type plug\n\
+  slave {\n\
+    pcm \"hw:1,0\"\n\
+  }\n\
+}\n\
+pcm.speaker {\n\
+  type plug\n\
+  slave {\n\
+    pcm \"hw:0,1\"\n\
+  }\n\
+}"
+echo ''
+echo "Setup mic and speaker"
+echo $mic_speaker_config > /home/pi/.asoundrc
