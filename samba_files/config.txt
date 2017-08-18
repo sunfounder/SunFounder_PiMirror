@@ -4,7 +4,7 @@ infomation_timeout = 30
 
 random_delay = 20
 
-screensaver = RANDOM
+screensaver = MIRROR
 
 screensaver_default = 2.jpg
 
@@ -12,15 +12,15 @@ time_format = 12
 
 date_format = %b %d, %Y
 
-weather_api_token = c2c387eeab5fbb1818b249079006633f
+weather_api_token = 
 
 weather_lang = en
 
 weather_unit = auto
 
-xlarge_text_size = 40
+xlarge_text_size = 72
 
-large_text_size = 30
+large_text_size = 100
 
 medium_text_size = 22
 
