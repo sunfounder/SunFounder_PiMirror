@@ -8,7 +8,7 @@ pid=0
 
 function start {
 	echo 'Program starting...'
-	/home/pi/SunFounder_PiMirror/pimirror/main.py > /dev/null 2>&1 &
+	/home/pi/SunFounder_PiMirror/pimirror/main.py
 	get_pid
 	echo 'Done, pid: '$pid
 }

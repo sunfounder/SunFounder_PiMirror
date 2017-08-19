@@ -18,21 +18,21 @@ echo -e "               ╚═════════════════�
 echo -e ''
 sleep 2s
 
-is_apt_get_updated='Not updated'
-is_pip_installed='Not installed'
-is_setuptools_installed='Not installed'
-is_google_assistant_installed='Not installed'
-is_google_auth_installed='Not installed'
-is_feedparser_installed='Not installed'
-is_imagetk_installed='Not installed'
-is_samba_installed='Not installed'
-is_google_auth='Not set'
-is_samba_set='Not set'
-is_audio_set='Not set'
-is_autostart_set='Not set'
-is_screensaver_disabled='Not installed'
-is_screen_rotation_set='Not set'
-is_weather_api_set='Not set'
+is_apt_get_updated='Skiped'
+is_pip_installed='Skiped'
+is_setuptools_installed='Skiped'
+is_google_assistant_installed='Skiped'
+is_google_auth_installed='Skiped'
+is_feedparser_installed='Skiped'
+is_imagetk_installed='Skiped'
+is_samba_installed='Skiped'
+is_google_auth='Skiped'
+is_samba_set='Skiped'
+is_samba_permission_granded='Skiped'
+is_audio_set='Skiped'
+is_autostart_set='Skiped'
+is_screen_rotation_set='Skiped'
+is_weather_api_set='Skiped'
 
 # install google assistant
 echo -e "!! Make sure you have finished creating Google project"
@@ -137,7 +137,7 @@ fi
 
 echo -e "┗━ Setup"
 egrep -v "^#|^$" /etc/samba/smb.conf > smb.conf.temp  # pick up all uncomment configrations
-if grep -q '[PiMirror]' smb.conf.temp; then  # whether Mirror in uncomment configrations or not
+if grep -q 'PiMirror' smb.conf.temp; then  # whether Mirror in uncomment configrations or not
     echo -e '   ┗━ Seem samba is already set, skip'
     is_samba_set='Success'
 else
@@ -152,18 +152,18 @@ fi
 echo -e '   ┗━ cleanup'
 sudo rm smb.conf.temp
 
-echo -e ''
-echo -e "Setup autostart"
-if  sudo sed -i '/SunFounder_PiMirror/d' /home/pi/.config/lxsession/LXDE-pi/autostart && echo -e "\n@/home/pi/SunFounder_PiMirror/pimirror/pimirror" >> /home/pi/.config/lxsession/LXDE-pi/autostart ; then
+echo -e "Give samba folder permission."
+echo -e "┗━ sudo chmod -R 777 /home/pi/SunFounder_PiMirror/samba_files/"
+if sudo chmod -R 777 /home/pi/SunFounder_PiMirror/samba_files/; then
     echo -e "   ┗━ Success"
-    is_autostart_set='Success'
+    is_samba_permission_granded='Success'
 else
     echo -e "   ┗━ Failed"
-    is_autostart_set='Failed'
+    is_samba_permission_granded='Failed'
 fi
 
 echo -e ''
-echo -e "Disable screen blank"
+echo -e "Setup autostart"
 if  sudo sed -i '/SunFounder_PiMirror/d' /home/pi/.config/lxsession/LXDE-pi/autostart && echo -e "\n@/home/pi/SunFounder_PiMirror/pimirror/pimirror" >> /home/pi/.config/lxsession/LXDE-pi/autostart ; then
     echo -e "   ┗━ Success"
     is_autostart_set='Success'
@@ -256,10 +256,10 @@ echo -e "   ┗━ feedparser   "$is_feedparser_installed
 echo -e "   ┗━ imagetk      "$is_imagetk_installed
 echo -e "   ┗━ samba        "$is_samba_installed
 echo -e "┗━ Configuration:"
-echo -e "   ┗━ Google authorization  "$is_google_auth
-echo -e "   ┗━ samba                 "$is_samba_set
-echo -e "   ┗━ audio                 "$is_audio_set
-echo -e "   ┗━ autostart             "$is_autostart_set
-echo -e "   ┗━ screensaver           "$is_screensaver_disabled
-echo -e "   ┗━ Screen Rotation       "$is_screen_rotation_set
-echo -e "   ┗━ Weather API           "$is_weather_api_set
+echo -e "   ┗━ Google authorization    "$is_google_auth
+echo -e "   ┗━ samba folder permission "$is_samba_set
+echo -e "   ┗━ samba                   "$is_samba_set
+echo -e "   ┗━ audio                   "$is_audio_set
+echo -e "   ┗━ autostart               "$is_autostart_set
+echo -e "   ┗━ Screen Rotation         "$is_screen_rotation_set
+echo -e "   ┗━ Weather API             "$is_weather_api_set

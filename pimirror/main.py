@@ -495,12 +495,10 @@ class Status_Handler(object):
             elif self.display_status == 'SCREENSAVER':
                 if conf.screensaver == 'MIRROR':
                     self.random_timer_stop()
-                    run_command('xset s %s'%conf.infomation_timeout)
                 elif conf.screensaver == 'RANDOM':
                     self.random_pic()
                     self.random_timer_stop()
                     self.random_timer_start()
-                    run_command('xset s off')
                 elif conf.screensaver == 'DEFAULT':
                     self.random_timer_stop()
                     self.show_pic(conf.screensaver_default)
@@ -643,6 +641,9 @@ conf = filedb.fileDB(db=CODE_DIR+'samba_files/config.txt')
 
 def main():
     global mirror, google_assistant, status_handler
+    run_command('xset s off')
+    run_command('xset -dpms')
+
     mirror = Mirror()
     google_assistant = Google_Assistant()
     status_handler = Status_Handler()
