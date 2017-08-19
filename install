@@ -34,26 +34,49 @@ is_autostart_set='Skiped'
 is_screen_rotation_set='Skiped'
 is_weather_api_set='Skiped'
 
-# install google assistant
-echo -e "!! Make sure you have finished creating Google project"
-echo -e "and get the client_secrets_<client_id>.json downloaded"
-read -p "under ~/Download, or the following might failed. Contiune? (Y/n) " confirm
-if [ "$confirm" == "y" ] || [ "$confirm" == "Y" ]; then
-    echo -e "OK! Move on."
-else
-    echo -e "OK! Bye~"
-fi
+echo -e "Setup google account"
+echo -e "    1. Go to the Google Projects page, right click on this link https://console.cloud.google.com/project, Copy URL, and paste it on the browser. Login your Google account or create one. Then, create a new project."
+read -p "    When you are done, come back here and hit enter to continue."
+echo -e ""
+echo -e '    2. Go to Google API console, right click on this link https://console.developers.google.com/apis/api/embeddedassistant.googleapis.com/overview and selected project you just created. Click Library, search "assistant", click the bottom Google Assistant API, and click Enable.'
+read -p "    When you are done, come back here and hit enter to continue."
+echo -e ""
+echo -e '    3. Create an OAuth Client ID with the following steps'
+echo -e '      a. click Credentials tab. Or click this to go to Google API Credentials https://console.developers.google.com/apis/credentials/oauthclient'
+echo -e '      b. You may need to set a product name for the product consent screen. On the OAuth consent screen tab, give the product a name and click Save.'
+echo -e '      c. Back to Credentials, click Create credentials, choose OAuth client ID'
+echo -e '      c. Click Other and give the client ID a name.'
+echo -e '      d. Click Create. A dialog box appears that shows you a client ID and secret. (No need to remember or save this, just close the dialog.)'
+echo -e '      e. Click the download icon (at the far right of screen) for the client ID to download the client secret JSON file (client_secret_<client-id>.json).'
+read -p "    When you are done, come back here and hit enter to continue."
+echo -e ""
+echo -e '    4. After downloaded, the client_secret_<client-id>.json may be under ~/Downloads. '
+echo -e '      a. Open File Manager, go to Downloads folder.'
+echo -e '      b. Check if there is one file named `client_secret_<...>.json`.'
+read -p "    When you are done, come back here and hit enter to continue."
+echo -e ""
+
+echo -e "Setup Dark Sky free weather api tocken"
+echo -e '    1. Go to Dark Sky API: https://darksky.net/dev/'
+echo -e '    2. LOG IN or SIGN UP, you will need to verified your account by email. When its done, Log in again'
+echo -e "    3. After you loged in, you can see Your Secret Key immediately. don't close the webpage, you will need it later."
+read -p "    When you are done, come back here and hit enter to continue."
 
 sleep 1s
+
+echo -e ""
+echo -e ""
 echo -e "Update apt-get list."
 echo -e "┗━ sudo apt-get update"
-if sudo apt-get update; then
+if sudo apt-get update ; then
     echo -e "   ┗━ Success"
     is_apt_get_updated='Success'
 else
     echo -e "   ┗━ Failed"
     is_apt_get_updated='Failed'
 fi
+
+# install google assistant
 echo -e "Install google assistant."
 echo -e "┗━ Install setuptools for python3 "
 echo -e "   ┗━ sudo python3 -m pip install --upgrade pip"
@@ -137,7 +160,7 @@ fi
 
 echo -e "┗━ Setup"
 egrep -v "^#|^$" /etc/samba/smb.conf > smb.conf.temp  # pick up all uncomment configrations
-if grep -q 'PiMirror' smb.conf.temp; then  # whether Mirror in uncomment configrations or not
+if grep -q 'PiMirror' smb.conf.temp ; then  # whether Mirror in uncomment configrations or not
     echo -e '   ┗━ Seem samba is already set, skip'
     is_samba_set='Success'
 else
@@ -154,7 +177,7 @@ sudo rm smb.conf.temp
 
 echo -e "Give samba folder permission."
 echo -e "┗━ sudo chmod -R 777 /home/pi/SunFounder_PiMirror/samba_files/"
-if sudo chmod -R 777 /home/pi/SunFounder_PiMirror/samba_files/; then
+if sudo chmod -R 777 /home/pi/SunFounder_PiMirror/samba_files/ ; then
     echo -e "   ┗━ Success"
     is_samba_permission_granded='Success'
 else
@@ -212,34 +235,51 @@ fi
 
 echo -e ''
 echo -e "Authorize google account"
-echo -e "┗━ Find client_secret json file"
-echo -e "   ┗━ ls /home/pi/Downloads/ | grep "client_secret""
-client_secret=`ls /home/pi/Downloads/ | grep "client_secret"`
-if [ "$client_secret" == "" ] ; then
-    echo -e "   ┗━ Failed"
-    is_google_auth='Failed'
+echo -e "┗━ Check if authorized"
+echo -e "   ┗━ ls /home/pi/.config/google-oauthlib-tool/credentials.json"
+if ls /home/pi/.config/google-oauthlib-tool/credentials.json ; then
+    echo -e '   ┗━ Seem google account is already authorize, skip'
+    is_google_auth='Success'
 else
-    echo -e "┗━ Authorize"
-    echo -e "   ┗━ google-oauthlib-tool --client-secrets /home/pi/Downloads/$client_secret --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless"
-    if sudo -u pi google-oauthlib-tool --client-secrets /home/pi/Downloads/$client_secret --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless ; then
-        echo -e "   ┗━ Success"
-        is_google_auth='Success'
-    else
+    echo -e "┗━ Find client_secret json file"
+    echo -e "   ┗━ ls /home/pi/Downloads/ | grep 'client_secret'"
+    client_secret=`ls /home/pi/Downloads/ | grep "client_secret"`
+    if [ "$client_secret" == "" ] ; then
         echo -e "   ┗━ Failed"
         is_google_auth='Failed'
+    else
+        echo -e "┗━ Authorize"
+        echo -e "   ┗━ google-oauthlib-tool --client-secrets /home/pi/Downloads/$client_secret --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless"
+        if sudo -u pi google-oauthlib-tool --client-secrets /home/pi/Downloads/$client_secret --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless ; then
+            echo -e "   ┗━ Success"
+            is_google_auth='Success'
+        else
+            echo -e "   ┗━ Failed"
+            is_google_auth='Failed'
+        fi
     fi
 fi
 
 echo -e ''
 echo -e "Setup Weather API"
-read -p "Enter Your Dark Sky Secret Key:" token
-token="weather_api_token = "$token
-if sudo sed -i "/\<weather_api_token/s/\<weather_api_token.*/$token/g" ./samba_files/config.txt ; then
-    echo -e "   ┗━ Success"
+if grep -q "weather_api_token" /home/pi/SunFounder_PiMirror/samba_files/config.txt ; then
+    echo -e '   ┗━ Seem Weather API is already set, skip'
     is_weather_api_set='Success'
 else
-    echo -e "   ┗━ Failed"
-    is_weather_api_set='Failed'
+    read -p "Enter Your Dark Sky Secret Key:" token
+    if [ "$token" == "" ] ; then
+        echo -e "   ┗━ Skip"
+        is_weather_api_set='Skiped'
+    else
+        token="weather_api_token = "$token
+        if sudo echo $token >> /home/pi/SunFounder_PiMirror/samba_files/config.txt ; then
+            echo -e "   ┗━ Success"
+            is_weather_api_set='Success'
+        else
+            echo -e "   ┗━ Failed"
+            is_weather_api_set='Failed'
+        fi
+    fi
 fi
 
 echo -e ''

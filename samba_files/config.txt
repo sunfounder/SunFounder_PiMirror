@@ -12,8 +12,6 @@ time_format = 12
 
 date_format = %b %d, %Y
 
-weather_api_token = 
-
 weather_lang = en
 
 weather_unit = auto
@@ -25,22 +23,4 @@ large_text_size = 100
 medium_text_size = 22
 
 small_text_size = 18
-
-city = Shenzhen
-
-region = 44
-
-regionName = Guangdong
-
-country = China
-
-countryCode = cn
-
-lat = 22.5333
-
-lon = 114.1333
-
-ip = 116.24.217.163
-
-timezone = Asia/Shanghai
 

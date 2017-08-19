@@ -85,12 +85,14 @@ class fileDB(object):
         conf.close()
 
     def get_ip_location(self):
+        import json
         print('Getting ip informations...',end='')
         url = "http://ip-api.com/json"
         result = self.get_from_url(url)
         location = json.loads(result.text)
         print ('done.')
         return location
+
     def get_from_url(self, url):
         for i in range(5):
             try:
@@ -99,8 +101,9 @@ class fileDB(object):
             except:
                 continue
         raise IOError('Timeout: %s; URL: %s'%(5,url))
+
     def get_location(self):
-        location = get_ip_location
+        location = self.get_ip_location()
         self.city = location['city']
         self.region = location['region']
         self.regionName = location['regionName']
@@ -110,6 +113,15 @@ class fileDB(object):
         self.lon = location['lon']
         self.ip = location['query']
         self.timezone = location['timezone']
+        print(self.city)
+        print(self.region)
+        print(self.regionName)
+        print(self.country)
+        print(self.countryCode)
+        print(self.lat)
+        print(self.lon)
+        print(self.ip)
+        print(self.timezone)
 
     @property
     def random_delay(self):
@@ -230,10 +242,10 @@ class fileDB(object):
 
     @property
     def city(self):
-        self._city = self.get('city', None)
-        if self._city == None:
+        self._city = self.get('city', '')
+        if self._city == '':
             self.get_location()
-            self._city = self.get('city', None)
+            self._city = self.get('city', '')
         return self._city
     @city.setter
     def city(self, value):
@@ -242,10 +254,10 @@ class fileDB(object):
 
     @property
     def region(self):
-        self._region = self.get('region', None)
-        if self._region == None:
+        self._region = self.get('region', '')
+        if self._region == '':
             self.get_location()
-            self._region = self.get('region', None)
+            self._region = self.get('region', '')
         return self._region
     @region.setter
     def region(self, value):
@@ -254,10 +266,10 @@ class fileDB(object):
 
     @property
     def regionName(self):
-        self._regionName = self.get('regionName', None)
-        if self._regionName == None:
+        self._regionName = self.get('regionName', '')
+        if self._regionName == '':
             self.get_location()
-            self._regionName = self.get('regionName', None)
+            self._regionName = self.get('regionName', '')
         return self._regionName
     @regionName.setter
     def regionName(self, value):
@@ -266,10 +278,10 @@ class fileDB(object):
 
     @property
     def country(self):
-        self._country = self.get('country', None)
-        if self._country == None:
+        self._country = self.get('country', '')
+        if self._country == '':
             self.get_location()
-            self._country = self.get('country', None)
+            self._country = self.get('country', '')
         return self._country
     @country.setter
     def country(self, value):
@@ -278,10 +290,10 @@ class fileDB(object):
 
     @property
     def countryCode(self):
-        self._countryCode = self.get('countryCode', None)
-        if self._countryCode == None:
+        self._countryCode = self.get('countryCode', '')
+        if self._countryCode == '':
             self.get_location()
-            self._countryCode = self.get('countryCode', None)
+            self._countryCode = self.get('countryCode', '')
         return self._countryCode
     @countryCode.setter
     def countryCode(self, value):
@@ -290,10 +302,10 @@ class fileDB(object):
 
     @property
     def lat(self):
-        self._lat = self.get('lat', None)
-        if self._lat == None:
+        self._lat = self.get('lat', '')
+        if self._lat == '':
             self.get_location()
-            self._lat = self.get('lat', None)
+            self._lat = self.get('lat', '')
         return self._lat
     @lat.setter
     def lat(self, value):
@@ -302,10 +314,10 @@ class fileDB(object):
 
     @property
     def lon(self):
-        self._lon = self.get('lon', None)
-        if self._lon == None:
+        self._lon = self.get('lon', '')
+        if self._lon == '':
             self.get_location()
-            self._lon = self.get('lon', None)
+            self._lon = self.get('lon', '')
         return self._lon
     @lon.setter
     def lon(self, value):
@@ -314,10 +326,10 @@ class fileDB(object):
 
     @property
     def ip(self):
-        self._ip = self.get('ip', None)
-        if self._ip == None:
+        self._ip = self.get('ip', '')
+        if self._ip == '':
             self.get_location()
-            self._ip = self.get('ip', None)
+            self._ip = self.get('ip', '')
         return self._ip
     @ip.setter
     def ip(self, value):
@@ -326,10 +338,10 @@ class fileDB(object):
 
     @property
     def timezone(self):
-        self._timezone = self.get('timezone', None)
-        if self._timezone == None:
+        self._timezone = self.get('timezone', '')
+        if self._timezone == '':
             self.get_location()
-            self._timezone = self.get('timezone', None)
+            self._timezone = self.get('timezone', '')
         return self._timezone
     @timezone.setter
     def timezone(self, value):

@@ -90,14 +90,28 @@ class Text(Frame):
         Frame.__init__(self, parent, bg='black')
         # initialize time label
         self.text = ''
-        self.textLbl = Message(self, font=('Helvetica', conf.large_text_size), fg="white", bg="black", width=500, justify=CENTER)
-        self.textLbl.pack()
+        self.text_large_Lbl = Message(self, font=('Helvetica', conf.large_text_size), fg="white", bg="black", width=500, justify=CENTER)
+        self.text_medium_Lbl = Message(self, font=('Helvetica', conf.medium_text_size), fg="white", bg="black", width=500, justify=CENTER)
+        self.text_small_Lbl = Message(self, font=('Helvetica', conf.small_text_size), fg="white", bg="black", width=500, justify=CENTER)
         self.is_displayed = False
 
     def set_text(self, new_text):
         if new_text != self.text:
             self.text = new_text
-            self.textLbl.config(text=self.text)
+            self.text_large_Lbl.config(text=self.text)
+            self.text_medium_Lbl.config(text=self.text)
+            self.text_small_Lbl.config(text=self.text)
+
+    def set_size(self, size):
+        self.text_large_Lbl.pack_forget()
+        self.text_medium_Lbl.pack_forget()
+        self.text_small_Lbl.pack_forget()
+        if size == 'large':
+            self.text_large_Lbl.pack()
+        if size == 'medium':
+            self.text_medium_Lbl.pack()
+        if size == 'small':
+            self.text_small_Lbl.pack()
 
 
 class Picture(Frame):
@@ -123,7 +137,7 @@ class Clock(Frame):
         Frame.__init__(self, parent, bg='black')
         # initialize time label
         self.time1 = ''
-        self.timeLbl = Label(self, font=('Helvetica', conf.large_text_size), fg="white", bg="black")
+        self.timeLbl = Label(self, font=('Helvetica', conf.medium_text_size), fg="white", bg="black")
         self.timeLbl.pack(side=TOP, anchor=E)
         # initialize day of week
         self.day_of_week1 = ''
@@ -264,8 +278,8 @@ class News(Frame):
                 headlines_url = "https://news.google.com/news?ned=%s&output=rss" % conf.countryCode
                 print ('local news at: %s'%headlines_url)
             except:
-                print ('local news not available: %s'%headlines_url)
                 headlines_url = "https://news.google.com/news?ned=us&output=rss"
+                print ('local news not available: %s'%headlines_url)
 
             feed = feedparser.parse(headlines_url)
 
@@ -425,9 +439,8 @@ class Google_Assistant(object):
                 status_handler.display_status = 'CLEANUP'
 
         if status != None:
-            self.assistant.set_mic_mute(True)
+            self.assistant.stop_conversation()
             status_handler.display_status = status
-            self.assistant.set_mic_mute(False)
 
     def process_status(self, text):
         text = text.lower()
@@ -530,12 +543,13 @@ class Status_Handler(object):
                 pass
             time.sleep(1)
 
-    def show_message(self, text):
+    def show_message(self, text, size='large'):
         if mirror.text.text != text or not mirror.text.is_displayed:
             print("show %s"%text)
             self.close_all()
             mirror.text.set_text(text)
             mirror.text.is_displayed = True
+            mirror.text.set_size(size)
             mirror.text.pack(anchor=N, padx=100, pady=500)
             self.sleep_timer_restart()
     def show_pic(self, pic):
@@ -564,7 +578,7 @@ class Status_Handler(object):
                     self.sleep_timer_restart()
                 else:
                     print("WEATHER not available")
-                    self.show_message('Weather not available\nPlease check your API in config file')
+                    self.show_message('Weather not available\nPlease check your API in config file', size='small')
                     self.display_status = 'SCREENSAVER'
             else:
                 self.show_message('Weather not available')
@@ -575,7 +589,7 @@ class Status_Handler(object):
             mirror.news.get_headlines()
             self.close_all()
             mirror.news.is_displayed = True
-            mirror.news.pack(anchor=N, padx=100, pady=500)
+            mirror.news.pack(anchor=N, padx=100, pady=400)
             #google_assistant.assistant.start_conversation()
             self.sleep_timer_restart()
     def show_news_detail(self):
@@ -586,7 +600,7 @@ class Status_Handler(object):
             mirror.news.get_detail(num)
             self.close_all()
             mirror.news.is_detail_displayed = True
-            mirror.news.pack(anchor=N, padx=100, pady=500)
+            mirror.news.pack(anchor=N, padx=100, pady=400)
             self.sleep_timer_restart()
     def random_pic(self):
         pic_list = os.listdir(self.screensaver_dir)
