@@ -1,5 +1,6 @@
 #!/bin/bash
 
+clear
 echo -e "     ╔═════════════════════════════════════════════════╗"
 echo -e "     ║                                                 ║"
 echo -e "     ║    ╔════╗       ╔═══╗             ╔═╗           ║"
@@ -17,16 +18,7 @@ echo -e "               ╚═════════════════�
 echo -e ''
 sleep 2s
 
-# install google assistant
-echo -e "!! Make sure you have finished creating Google project"
-echo -e "and get the client secrets downloaded, or the following"
-read -p "might failed. Contiune? (Y/n) " confirm
-if [ "$confirm" == "y" ] || [ "$confirm" == "Y" ]; then
-    echo -e "OK! Move on."
-else
-    echo -e "OK! Bye~"
-fi
-
+is_apt_get_updated='Not updated'
 is_pip_installed='Not installed'
 is_setuptools_installed='Not installed'
 is_google_assistant_installed='Not installed'
@@ -38,10 +30,30 @@ is_google_auth='Not set'
 is_samba_set='Not set'
 is_audio_set='Not set'
 is_autostart_set='Not set'
+is_screensaver_disabled='Not installed'
 is_screen_rotation_set='Not set'
 is_weather_api_set='Not set'
 
+# install google assistant
+echo -e "!! Make sure you have finished creating Google project"
+echo -e "and get the client_secrets_<client_id>.json downloaded"
+read -p "under ~/Download, or the following might failed. Contiune? (Y/n) " confirm
+if [ "$confirm" == "y" ] || [ "$confirm" == "Y" ]; then
+    echo -e "OK! Move on."
+else
+    echo -e "OK! Bye~"
+fi
+
 sleep 1s
+echo -e "Update apt-get list."
+echo -e "┗━ sudo apt-get update"
+if sudo apt-get update; then
+    echo -e "   ┗━ Success"
+    is_apt_get_updated='Success'
+else
+    echo -e "   ┗━ Failed"
+    is_apt_get_updated='Failed'
+fi
 echo -e "Install google assistant."
 echo -e "┗━ Install setuptools for python3 "
 echo -e "   ┗━ sudo python3 -m pip install --upgrade pip"
@@ -142,7 +154,17 @@ sudo rm smb.conf.temp
 
 echo -e ''
 echo -e "Setup autostart"
-if  sudo sed -i '/SunFounder_PiMirror/d' /home/pi/.config/lxsession/LXDE-pi/autostart && echo -e "\n@/home/pi/SunFounder_PiMirror/pimirror/watchdog" >> /home/pi/.config/lxsession/LXDE-pi/autostart ; then
+if  sudo sed -i '/SunFounder_PiMirror/d' /home/pi/.config/lxsession/LXDE-pi/autostart && echo -e "\n@/home/pi/SunFounder_PiMirror/pimirror/pimirror" >> /home/pi/.config/lxsession/LXDE-pi/autostart ; then
+    echo -e "   ┗━ Success"
+    is_autostart_set='Success'
+else
+    echo -e "   ┗━ Failed"
+    is_autostart_set='Failed'
+fi
+
+echo -e ''
+echo -e "Disable screen blank"
+if  sudo sed -i '/SunFounder_PiMirror/d' /home/pi/.config/lxsession/LXDE-pi/autostart && echo -e "\n@/home/pi/SunFounder_PiMirror/pimirror/pimirror" >> /home/pi/.config/lxsession/LXDE-pi/autostart ; then
     echo -e "   ┗━ Success"
     is_autostart_set='Success'
 else
@@ -180,7 +202,7 @@ fi
 
 echo -e ''
 echo -e "Setup screen rotation"
-if sudo sed -i '/display_rotate=/d' /boot/config.txt && sudo echo "display_rotate=2" >> /boot/config.txt ; then
+if sudo sed -i '/display_rotate=/d' /boot/config.txt && sudo echo "display_rotate=1" >> /boot/config.txt ; then
     echo -e "   ┗━ Success"
     is_screen_rotation_set='Success'
 else
@@ -190,13 +212,22 @@ fi
 
 echo -e ''
 echo -e "Authorize google account"
-echo -e "┗━ google-oauthlib-tool --client-secrets /home/pi/client_secret.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless"
-if sudo -u pi google-oauthlib-tool --client-secrets /home/pi/client_secret.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless ; then
-    echo -e "┗━ Success"
-    is_google_auth='Success'
-else
-    echo -e "┗━ Failed"
+echo -e "┗━ Find client_secret json file"
+echo -e "   ┗━ ls /home/pi/Downloads/ | grep "client_secret""
+client_secret=`ls /home/pi/Downloads/ | grep "client_secret"`
+if [ "$client_secret" == "" ] ; then
+    echo -e "   ┗━ Failed"
     is_google_auth='Failed'
+else
+    echo -e "┗━ Authorize"
+    echo -e "   ┗━ google-oauthlib-tool --client-secrets /home/pi/Downloads/$client_secret --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless"
+    if sudo -u pi google-oauthlib-tool --client-secrets /home/pi/Downloads/$client_secret --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless ; then
+        echo -e "   ┗━ Success"
+        is_google_auth='Success'
+    else
+        echo -e "   ┗━ Failed"
+        is_google_auth='Failed'
+    fi
 fi
 
 echo -e ''
@@ -214,18 +245,21 @@ fi
 echo -e ''
 echo -e ''
 echo -e "Summery:"
+echo -e "┗━ Basic:"
+echo -e "   ┗━ Apt get update "$is_apt_get_updated
 echo -e "┗━ Install:"
 echo -e "   ┗━ Google Assistant Library   "$is_google_assistant_installed
 echo -e "   ┗━ Google authorization tool  "$is_google_auth_installed
-echo -e "   ┗━ pip         "$is_pip_installed
-echo -e "   ┗━ setuptools  "$is_setuptools_installed
-echo -e "   ┗━ feedparser  "$is_feedparser_installed
-echo -e "   ┗━ imagetk     "$is_imagetk_installed
-echo -e "   ┗━ samba       "$is_samba_installed
+echo -e "   ┗━ pip          "$is_pip_installed
+echo -e "   ┗━ setuptools   "$is_setuptools_installed
+echo -e "   ┗━ feedparser   "$is_feedparser_installed
+echo -e "   ┗━ imagetk      "$is_imagetk_installed
+echo -e "   ┗━ samba        "$is_samba_installed
 echo -e "┗━ Configuration:"
 echo -e "   ┗━ Google authorization  "$is_google_auth
 echo -e "   ┗━ samba                 "$is_samba_set
 echo -e "   ┗━ audio                 "$is_audio_set
 echo -e "   ┗━ autostart             "$is_autostart_set
+echo -e "   ┗━ screensaver           "$is_screensaver_disabled
 echo -e "   ┗━ Screen Rotation       "$is_screen_rotation_set
 echo -e "   ┗━ Weather API           "$is_weather_api_set

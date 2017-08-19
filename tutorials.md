@@ -22,8 +22,7 @@
     e. Click ⬇ (at the far right of screen) for the client ID to download the client secret JSON file (client_secret_<client-id>.json).
 4. After downloaded, the `client_secret_<client-id>.json` may be under `~/Downloads`. 
     a. Open File Manager, go to Downloads folder.
-    b. Copy the `client_secret_<client-id>.json` file to `/home/pi`
-    c. Rename it to `client_secret.json`. Please double check the file name ,it should be exactly the same as `client_secret.json`
+    b. Check if there is one file named `client_secret_<...>.json`.
 
 ### 获取天气API from Dark Sky
 1. Go to [Dark Sky API](https://darksky.net/dev/)

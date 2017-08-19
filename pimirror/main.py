@@ -495,13 +495,16 @@ class Status_Handler(object):
             elif self.display_status == 'SCREENSAVER':
                 if conf.screensaver == 'MIRROR':
                     self.random_timer_stop()
+                    run_command('xset s %s'%conf.infomation_timeout)
                 elif conf.screensaver == 'RANDOM':
                     self.random_pic()
                     self.random_timer_stop()
                     self.random_timer_start()
+                    run_command('xset s off')
                 elif conf.screensaver == 'DEFAULT':
                     self.random_timer_stop()
                     self.show_pic(conf.screensaver_default)
+                    run_command('xset s off')
                 self.display_status = None
                     
             elif self.display_status == 'CLEANUP':
