@@ -7,40 +7,40 @@ program_command="python3 "$program_dir$program_name" > /dev/null 2>&1 &"
 pid=0
 
 function start {
-	echo 'Program starting...'
-	/home/pi/SunFounder_PiMirror/pimirror/main.py
-	get_pid
-	echo 'Done, pid: '$pid
+    echo 'Program starting...'
+    /home/pi/SunFounder_PiMirror/pimirror/main.py
+    get_pid
+    echo 'Done, pid: '$pid
 }
 
 function stop {
-	echo 'Program pid '$pid' stoping...'
-	sudo kill $pid
-	echo 'Done'
-	exit
+    echo 'Program pid '$pid' stoping...'
+    sudo kill $pid
+    echo 'Done'
+    exit
 }
 
 function get_pid {
-	program=`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py' | awk '{ print $11 }'`
-	temp_pid=`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py' | awk '{ print $2 }'`
-	if [ "$program" == "python3" ]; then
-		pid=$temp_pid
-	else
-		pid=0
-	fi
+    program=`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py' | awk '{ print $11 }'`
+    temp_pid=`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py' | awk '{ print $2 }'`
+    if [ "$program" == "python3" ]; then
+        pid=$temp_pid
+    else
+        pid=0
+    fi
 }
 
 trap stop SIGINT
 while :
 do
-	get_pid
-	if [ "$pid" == 0 ]; then
-		echo 'Program stops. Restarting...'
-		echo '[DEBUG] '`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py'`
-		start
-	#else
-	#	echo 'Program running at pid: '$pid
-	fi
-	sleep 2s
+    get_pid
+    if [ "$pid" == 0 ]; then
+        echo 'Program stops. Restarting...'
+        echo '[DEBUG] '`ps aux | grep -m 1 '/home/pi/SunFounder_PiMirror/pimirror/main.py'`
+        start
+    #else
+    #   echo 'Program running at pid: '$pid
+    fi
+    sleep 2s
 done
 stop

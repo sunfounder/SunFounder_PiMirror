@@ -1,26 +1,50 @@
+# Set the mount of show news (1 ~ 10)
 news_mount = 5
-
+# Set sleep time (s)
 infomation_timeout = 30
-
+# Set random picture switching time (s)
 random_delay = 20
 
+# Set screen saver mode (MIRROR, RANDOM, DEFAULT)
 screensaver = MIRROR
 
+# Set DEFAULT screensaver picture
 screensaver_default = 2.jpg
 
+# Set time format (12, 24)
 time_format = 12
 
+# Set date format
 date_format = %b %d, %Y
 
-weather_lang = en
-
-weather_unit = auto
-
+# Set Ex-large text size
 xlarge_text_size = 72
 
+# Set large text size
 large_text_size = 100
 
+# Set medium text size
 medium_text_size = 22
 
+# Set small text size
 small_text_size = 18
 
+# Set weather language. For more detail, see https://darksky.net/dev/docs/time-machine
+weather_lang = en
+
+# Set weather unit. For more detail, see https://darksky.net/dev/docs/time-machine
+weather_unit = auto
+
+# Set weather API. For more detail, see https://darksky.net/dev
+weather_api_token =
+
+# Set locations, automatically get from your IP address if leave empty, also can be set manually
+city =
+country =
+countryCode =
+lat =
+lon =
+ip =
+timezone =
+regionName =
+region =

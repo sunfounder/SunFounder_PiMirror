@@ -11,6 +11,7 @@
 '''
 from os import system as run
 from requests import get as request
+import io
 class fileDB(object):
     """A file based database.
 
@@ -41,7 +42,7 @@ class fileDB(object):
     def get(self, name, default_value=None):
         """Get value by data's name. Default value is for the arguemants do not exist"""
         try:
-            conf = open(self.db,'r')
+            conf = io.open(self.db,'r', newline='\r\n')
             lines=conf.readlines()
             conf.close()
             file_len=len(lines)-1
@@ -64,7 +65,7 @@ class fileDB(object):
         """Set value by data's name. Or create one if the arguement does not exist"""
 
         # Read the file
-        conf = open(self.db,'r')
+        conf = open(self.db,'r', newline='\r\n')
         lines=conf.readlines()
         conf.close()
         file_len=len(lines)-1
@@ -73,15 +74,16 @@ class fileDB(object):
         for i in range(file_len):
             if lines[i][0] != '#':
                 if lines[i].split('=')[0].strip() == name:
-                    lines[i] = '%s = %s\n' % (name, value)
+                    lines[i] = '%s = %s\r\n' % (name, value)
                     flag = True
         # If arguement does not exist, create one
         if not flag:
-            lines.append('%s = %s\n\n' % (name, value))
+            lines.append('%s = %s\r\n' % (name, value))
 
         # Save the file
+        lines = ''.join(lines)
         conf = open(self.db,'w')
-        conf.writelines(lines)
+        conf.write(lines)
         conf.close()
 
     def get_ip_location(self):
@@ -113,15 +115,15 @@ class fileDB(object):
         self.lon = location['lon']
         self.ip = location['query']
         self.timezone = location['timezone']
-        print(self.city)
-        print(self.region)
-        print(self.regionName)
-        print(self.country)
-        print(self.countryCode)
-        print(self.lat)
-        print(self.lon)
-        print(self.ip)
-        print(self.timezone)
+        print(location['city'])
+        print(location['region'])
+        print(location['regionName'])
+        print(location['country'])
+        print(location['countryCode'].lower())
+        print(location['lat'])
+        print(location['lon'])
+        print(location['query'])
+        print(location['timezone'])
 
     @property
     def random_delay(self):

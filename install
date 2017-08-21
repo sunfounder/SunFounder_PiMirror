@@ -34,6 +34,11 @@ is_autostart_set='Skiped'
 is_screen_rotation_set='Skiped'
 is_weather_api_set='Skiped'
 
+if [ "$(whoami)" != "root" ] ; then
+    echo -e "You must run this script as root."
+    exit 0
+fi
+
 echo -e "Setup google account"
 echo -e "    1. Go to the Google Projects page, right click on this link https://console.cloud.google.com/project, Copy URL, and paste it on the browser. Login your Google account or create one. Then, create a new project."
 read -p "    When you are done, come back here and hit enter to continue."
