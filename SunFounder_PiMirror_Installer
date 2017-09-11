@@ -1,0 +1,639 @@
+#!/usr/bin/python3
+
+import tkinter as tk
+from tkinter import filedialog, ttk
+import string
+import os
+import subprocess
+import threading
+import time
+
+__version__ = "v1.0.0"
+
+large_text_size  = 30
+medium_text_size = 20
+small_text_size  = 12
+
+BACKGROUND_COLOR = '#EEEEEE'
+FOREGROUND_COLOR = '#202020'
+ERROR_COLOR = '#FA0F0F'
+
+google_client_secret = False
+weather_api = ""
+busy = False
+
+def log(msg):
+    msg = "[%s] %s" % (time.asctime(), msg)
+    os.system('echo %s >> pimirror.log' % msg)
+
+class run_command(object):
+    def __init__(self, cmd):
+        self.cmd = cmd
+
+    def print_output(self, output):
+        pass
+
+    def when_success(self):
+        log("Finished! Return code: %s"%self.returncode)
+
+    def when_failed(self):
+        log("Faild! Return code: %s"%self.returncode)
+
+    def execute(self):
+        proc = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, shell=True)
+        while True:
+            line = proc.stdout.readline().decode('ascii')
+            if line != '':
+                #the real code does filtering here
+                output = line.rstrip()
+                self.print_output(output)
+            else:
+                proc.wait()
+                self.returncode = proc.returncode
+                if self.returncode == 0:
+                    self.when_success()
+                else:
+                    self.when_failed()
+                break
+
+    def start(self):
+        self.thread = threading.Thread(target = self.execute)
+        self.thread.start()
+
+class basic_step(tk.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, bg=BACKGROUND_COLOR)
+        # initialize time label
+        self.setup()
+
+    def setup(self):
+        pass
+
+class Step_0(basic_step):
+    def setup(self):
+        self.title = tk.Label(self,
+            font = ('Helvetica', large_text_size),
+            text = "PiMirror Installer",
+            fg = FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            justify = tk.CENTER)
+        self.subtitle = tk.Message(self,
+            font = ('Helvetica', medium_text_size),
+            text = "This program will help you to install PiMirror onto your Raspberry Pi.",
+            fg = FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            width = 500,
+            justify=tk.CENTER)
+        self.info_frame = tk.Frame(self,
+            bg=BACKGROUND_COLOR)
+        self.info_version = tk.Label(self.info_frame,
+            font = ('Helvetica', small_text_size),
+            text=__version__,
+            fg=FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            justify = tk.CENTER)
+        self.info_company = tk.Label(self.info_frame,
+            font = ('Helvetica', small_text_size),
+            text='SunFounder',
+            fg=FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            justify = tk.CENTER)
+        self.info_web = tk.Label(self.info_frame,
+            font = ('Helvetica', small_text_size),
+            text="www.sunfounder.com",
+            fg=FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            justify = tk.CENTER)
+
+    def show(self):
+        self.pack(fill='both', pady=70)
+        self.title.pack()
+        self.subtitle.pack()
+        self.info_frame.pack(pady=20)
+        self.info_web.pack(side=tk.BOTTOM)
+        self.info_company.pack(side=tk.BOTTOM)
+        self.info_version.pack(side=tk.BOTTOM)
+
+    def hide(self):
+        self.pack_forget()
+
+
+class Step_with_button(basic_step):
+    title = 'input title here'
+    message_text = 'input message text'
+    button_text = 'input link button text'
+    button_message_text = ''
+    pady=50
+    button_disabled = False
+    def setup(self):
+        self.title = tk.Message(self,
+            font = ('Helvetica', medium_text_size),
+            text = self.title,
+            fg = FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            width = 500)
+        self.message = tk.Message(self,
+            font = ('Helvetica', small_text_size),
+            text = self.message_text,
+            fg = FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            width = 500)
+        self.button_frame = tk.Frame(self,
+            bg=BACKGROUND_COLOR)
+        self.button_message = tk.Message(self.button_frame,
+            font = ('Helvetica', small_text_size),
+            text = self.button_message_text,
+            fg = FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            width = 500)
+        self.button = tk.Button(self.button_frame,
+            font = ('Helvetica', small_text_size),
+            width=20,
+            text=self.button_text,
+            bg=BACKGROUND_COLOR)
+        self.button.bind('<ButtonRelease-1>',self.button_handle)
+
+    def button_handle(self, ev):
+        log("button clicked")
+
+    def show(self):
+        self.pack(fill='both', pady=self.pady)
+        self.title.pack()
+        self.message.pack()
+        self.button_frame.pack(fill='both', pady=40)
+        self.button_message.pack()
+        if not self.button_disabled:
+            self.button.pack()
+
+    def hide(self):
+        self.pack_forget()
+        self.title.pack_forget()
+        self.message.pack_forget()
+        self.button_frame.pack_forget()
+        self.button_message.pack_forget()
+        self.button.pack_forget()
+
+class Step_with_entry(basic_step):
+    title = 'input title here'
+    message_text = 'input message text'
+    pady=50
+    def setup(self):
+        self.title = tk.Message(self,
+            font = ('Helvetica', medium_text_size),
+            text = self.title,
+            fg = FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            width = 500)
+        self.message = tk.Message(self,
+            font = ('Helvetica', small_text_size),
+            text = self.message_text,
+            fg = FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            width = 500)
+        self.entry_frame = tk.Frame(self,
+            bg=BACKGROUND_COLOR)
+        self.entry_text_var = tk.StringVar(self.entry_frame)
+        self.entry = tk.Entry(self.entry_frame,
+            font = ('Helvetica', small_text_size),
+            textvariable=self.entry_text_var,
+            width=400)
+        self.entry_text_var.trace("w", self.entry_changes)
+
+    def entry_changes(self, a,b,c):
+        pass
+
+    def show(self):
+        self.pack(fill='both', pady=self.pady)
+        self.title.pack()
+        self.message.pack()
+        self.entry_frame.pack(fill='both', pady=40)
+        self.entry.pack()
+
+    def hide(self):
+        self.pack_forget()
+        self.title.pack_forget()
+        self.message.pack_forget()
+        self.entry_frame.pack_forget()
+        self.entry.pack_forget()
+
+class Step_1(Step_with_button):
+    title = '1. Setup Google Assistant'
+    link_url = 'input link url'
+    def button_handle(self, ev):
+        os.system("x-www-browser %s > /dev/null 2>&1 &"%self.link_url)
+
+class Step_1_1(Step_1):
+    message_text = "1.1. Click on the button below to go to the Google Projects page. Login your Google account or create one. Then, create a new project."
+    button_text = 'Google Projects Page'
+    link_url = 'https://console.cloud.google.com/project'
+
+class Step_1_2(Step_1):
+    message_text = '1.2. Click the button below to go to Google API console, and selected project you just created. Click Library, search "assistant", click the bottom Google Assistant API, and click Enable.'
+    button_text = 'Google API console'
+    link_url = 'https://console.developers.google.com/apis/api/embeddedassistant.googleapis.com/overview'
+
+class Step_1_3(Step_1):
+    message_text = '1.3. Click the button below to go to Google API Credentials. You may need to set a product name for the product consent screen. On the OAuth consent screen tab, give the product a name and click Save.'
+    button_text = 'Google API Credentials'
+    link_url = 'https://console.developers.google.com/apis/credentials/oauthclient'
+    pady=40
+
+class Step_1_4(Step_1):
+    message_text = '1.4. Back to Credentials, click Create credentials, choose OAuth client ID'
+    button_text = 'Google API Credentials'
+    link_url = 'https://console.developers.google.com/apis/credentials/oauthclient'
+
+class Step_1_5(Step_1):
+    message_text = '1.5. Click Other and give the client ID a name.'
+    button_text = 'Google API Credentials'
+    link_url = 'https://console.developers.google.com/apis/credentials/oauthclient'
+
+class Step_1_6(Step_1):
+    message_text = '1.6. A dialog box appears that shows you a client ID and secret. (No need to remember or save this, just close the dialog.) Click the download icon (at the far right of screen) for the client ID to download the client secret JSON file.'
+    button_text = 'Google API Credentials'
+    link_url = 'https://console.developers.google.com/apis/credentials/oauthclient'
+    pady=40
+
+class Step_1_7(Step_1):
+    message_text = '1.7. After downloaded, the client_secret_<client-id>.json may be under ~/Downloads. click the button below to choose your client_secret_file.'
+    button_text = 'Choose file'
+
+    def button_handle(self, ev):
+        global google_client_secret
+        filename = filedialog.askopenfilename()
+        google_client_secret = filename
+        comfirm_text = 'Select file: %s' % google_client_secret
+        self.button_message.configure(text=comfirm_text)
+        return False
+
+
+class Step_2(Step_with_button):
+    title = '2. Setup Darksky Assistant'
+    link_url = 'input link url'
+    def button_handle(self, ev):
+        os.system("x-www-browser %s > /dev/null 2>&1 &"%self.link_url)
+
+class Step_2_1(Step_2):
+    message_text = "2.1. This step is to setup weather informations. If you don't need it, keep pressing \"Next\" till Step 3, to skip this."
+    button_disabled = True
+
+class Step_2_2(Step_2):
+    message_text = "2.2. Click the button below to go to Dark Sky API. LOG IN or SIGN UP, you will need to verified your account by email. When its done, Log in again."
+    link_url = 'https://darksky.net/dev/'
+    button_text = 'Dark Sky API'
+
+class Step_2_3(Step_with_entry):
+    title = '2. Setup Darksky Assistant'
+    message_text = "2.3. After you loged in, you can see Your Secret Key immediately. "
+    def entry_changes(self, a,b,c):
+        global weather_api
+        weather_api = self.entry_text_var.get()
+        log("Weather api changes to: %s"%weather_api)
+
+
+class Step_3(Step_with_button):
+    title = '3. Update Apt-get list'
+    message_text = "Click the \"Update\" button below to update apt list. If you have no idea about this ,just click update."
+    button_text = 'Update'
+
+    def button_handle(self, ev):
+        global busy
+        def show_output(output):
+            self.button_message.config(text=output)
+        def failed():
+            global busy
+            show_output('Faild.')
+            busy = False
+        def success():
+            global busy
+            show_output('Success.')
+            busy = False
+        show_output('Updating... Please wait.')
+        r = run_command("sudo apt-get update")
+        r.print_output = show_output
+        r.when_failed = failed
+        r.when_success = success
+        busy = True
+        r.start()
+
+class Step_4(Step_with_button):
+    title = '4. Install'
+    message_text = "Click the \"Install\" button below to install everything."
+    button_text = 'Install'
+
+    def button_handle(self, ev):
+        global busy
+        def show_output(output):
+            log(output)
+            self.button_message.config(text=output)
+        def failed():
+            global busy
+            show_output('Faild. please check log file: pimirror.log. Or sent it to service@sunfounder.com.')
+            busy = False
+        def install_finished():
+            global busy
+            self.message.config(text="Success!")
+            show_output('You can now click Finish')
+            busy = False
+        def install_begin():
+            global busy
+            busy = True
+            self.message.config(text="Installing")
+            r = run_command("cd ~/SunFounder_PiMirror ; sudo ./install")
+            r.print_output = show_output
+            r.when_failed = failed
+            r.when_success = install_finished
+            r.start()
+        def download_success():
+            global busy
+            show_output('Success. The installation will start after 2 secs.')
+            busy = False
+            time.sleep(2)
+            install_begin()
+
+        self.message.config(text="Downloading from Github...")
+        r = run_command("cd ~/ ; git clone https://github.com/sunfounder/SunFounder_PiMirror.git")
+        r.print_output = show_output
+        r.when_failed = failed
+        r.when_success = download_success
+        busy = True
+        r.start()
+
+class Finished(Step_with_button):
+    step = 'final'
+    title = 'Finished'
+    message_text = 'Installaion is now finished, you must reboot to make effect. Click the Reboot button below to reboot, or finish button to reboot later.'
+    button_text = 'Reboot now'
+
+    def link_handle(self, ev):
+        os.system("sudo reboot")
+
+
+class Notification(object):
+    def __init__(self, msg, n_type='message'):
+        self.top = tk.Tk()
+        self.top.title('SunFounder PiMirror Installer')
+        self.top.configure(background=BACKGROUND_COLOR)
+        #self.top.iconbitmap('./SunFounder_LOGO_small.ico')
+        main_frame = tk.Frame(self.top, bg=BACKGROUND_COLOR)
+        control_frame = tk.Frame(self.top, bg=BACKGROUND_COLOR)
+
+        self.message = tk.Message(main_frame,
+            font = ('Helvetica', small_text_size),
+            text = msg,
+            fg = FOREGROUND_COLOR,
+            bg=BACKGROUND_COLOR,
+            width = 300,
+            justify=tk.CENTER)
+
+        main_frame.pack(padx=10, pady=30, fill="both")
+        control_frame.pack(padx=5, pady=5, side=tk.BOTTOM, fill="both")
+        self.message.pack()
+        if n_type == 'message':
+            self.ok_button = tk.Button(control_frame,
+                font = ('Helvetica', small_text_size),
+                width=10,
+                text='OK',
+                bg=BACKGROUND_COLOR)
+            
+            self.ok_button.pack(side=tk.RIGHT)
+            self.ok_button.bind('<ButtonRelease-1>',self.ok_func)
+        elif n_type == 'yes_no':
+            self.yes_button = tk.Button(control_frame_2,
+                font = ('Helvetica', small_text_size),
+                width=10,
+                text='Yes',
+                bg=BACKGROUND_COLOR)
+            self.no_button = tk.Button(control_frame_2,
+                font = ('Helvetica', small_text_size),
+                width=10,
+                text='No',
+                bg=BACKGROUND_COLOR)
+
+            self.yes_button.pack(side=tk.RIGHT)
+            self.no_button.pack(side=tk.RIGHT)
+            self.yes_button.bind('<ButtonRelease-1>', self.yes_func)
+            self.no_button.bind('<ButtonRelease-1>', self.no_func)
+
+        self.top.resizable(width=False, height=False)
+        self.top.geometry('{}x{}'.format(400, 150))
+
+    def start(self):
+        self.top.mainloop()
+
+    def stop(self):
+        quit()
+
+    def ok_func(self, ev):
+        self.destroy()
+
+    def yes_func(self, ev):
+        pass
+
+    def no_func(self, ev):
+        pass
+
+    def destroy(self):
+        self.top.destroy()
+
+class PiMirror_installer(object):
+
+    def __init__(self):
+        self.top = tk.Tk()
+        self.top.title('SunFounder PiMirror Installer')
+        self.top.configure(background=BACKGROUND_COLOR)
+        #self.top.iconbitmap('./SunFounder_LOGO_small.ico')
+        main_frame = tk.Frame(self.top, bg=BACKGROUND_COLOR)
+        control_frame = tk.Frame(self.top, bg=BACKGROUND_COLOR)
+        control_frame_1 = tk.Frame(control_frame, bg=BACKGROUND_COLOR)
+        control_frame_2 = tk.Frame(control_frame, bg=BACKGROUND_COLOR)
+        self.step_0   = Step_0(main_frame, anchor='c')
+        self.step_1_1 = Step_1_1(main_frame, anchor='c')
+        self.step_1_2 = Step_1_2(main_frame, anchor='c')
+        self.step_1_3 = Step_1_3(main_frame, anchor='c')
+        self.step_1_4 = Step_1_4(main_frame, anchor='c')
+        self.step_1_5 = Step_1_5(main_frame, anchor='c')
+        self.step_1_6 = Step_1_6(main_frame, anchor='c')
+        self.step_1_7 = Step_1_7(main_frame, anchor='c')
+        self.step_2_1 = Step_2_1(main_frame, anchor='c')
+        self.step_2_2 = Step_2_2(main_frame, anchor='c')
+        self.step_2_3 = Step_2_3(main_frame, anchor='c')
+        self.step_3   = Step_3(main_frame, anchor='c')
+        self.step_4   = Step_4(main_frame, anchor='c')
+        self.step_finished = Finished(main_frame, anchor='c')
+
+        self.progress_bar = ttk.Progressbar(control_frame_1,
+            orient="horizontal",
+            length=600,
+            mode="determinate")
+        self.finish_button = tk.Button(control_frame_2,
+            font = ('Helvetica', small_text_size),
+            width=10,
+            text='Finish',
+            bg=BACKGROUND_COLOR)
+        self.next_button = tk.Button(control_frame_2,
+            font = ('Helvetica', small_text_size),
+            width=10,
+            text='Next',
+            bg=BACKGROUND_COLOR)
+        self.skip_button = tk.Button(control_frame_2,
+            font = ('Helvetica', small_text_size),
+            width=10,
+            text='Skip',
+            bg=BACKGROUND_COLOR)
+        self.prev_button = tk.Button(control_frame_2,
+            font = ('Helvetica', small_text_size),
+            width=10,
+            text='Previous',
+            bg=BACKGROUND_COLOR)
+
+        main_frame.pack(padx=20, pady=10, fill="both")
+        control_frame.pack(padx=15, pady=5, side=tk.BOTTOM, fill="both")
+        control_frame_1.pack(padx=15, pady=5, fill="x")
+        control_frame_2.pack(padx=15, pady=5, fill="x")
+        self.progress_bar.pack(anchor='c')
+        self.finish_button.pack(side=tk.RIGHT)
+        self.next_button.pack(side=tk.RIGHT)
+        self.skip_button.pack(side=tk.RIGHT)
+        self.prev_button.pack(side=tk.RIGHT)
+        self.finish_button.bind('<ButtonRelease-1>',self.finish_step)
+        self.next_button.bind('<ButtonRelease-1>',self.next_step)
+        self.skip_button.bind('<ButtonRelease-1>', self.skip_step)
+        self.prev_button.bind('<ButtonRelease-1>', self.prev_step)
+
+        self.step_list = [
+            [
+                self.step_0,
+            ],
+            [
+                self.step_1_1,
+                self.step_1_2,
+                self.step_1_3,
+                self.step_1_4,
+                self.step_1_5,
+                self.step_1_6,
+                self.step_1_7,
+            ],
+            [
+                self.step_2_1,
+                self.step_2_2,
+                self.step_2_3,
+            ],
+            [
+                self.step_3,
+            ],
+            [
+                self.step_4,
+            ],
+            [
+                self.step_finished,
+            ],
+            ]
+        self._last_step = [0,0]
+        self._main_step = 0
+        self._sub_step = -1
+        self.progress_bar["value"] = 0
+        self.progress_bar["maximum"] = len(self.step_list)-1
+        self.top.resizable(width=False, height=False)
+        self.top.geometry('{}x{}'.format(640, 480))
+        self.prev_button.config(state=tk.DISABLED)
+        self.prev_button.update()
+
+    @property
+    def main_step(self):
+        return self._main_step
+
+    @main_step.setter
+    def main_step(self, value):
+        if value <= 0:
+            self.prev_button.config(state=tk.DISABLED)
+            self.prev_button.update()
+            self._main_step = 0
+        elif value >= len(self.step_list)-1:
+            self.next_button.config(state=tk.DISABLED)
+            self.next_button.update()
+            self.skip_button.config(state=tk.DISABLED)
+            self.skip_button.update()
+            self.finish_button.config(text="Close")
+            self.finish_button.update()
+            self._main_step = len(self.step_list)-1
+        else:
+            self.prev_button.config(state=tk.NORMAL)
+            self.prev_button.update()
+            self.next_button.config(state=tk.NORMAL)
+            self.next_button.update()
+            self.skip_button.config(state=tk.NORMAL)
+            self.skip_button.update()
+            self.finish_button.config(text="Finish")
+            self.finish_button.update()
+            self._main_step = value
+
+    @property
+    def sub_step(self):
+        return self._sub_step
+
+    @sub_step.setter
+    def sub_step(self, value):
+        log('Hide %d.%d'%(self._main_step,self._sub_step))
+        self.step_list[self._last_step[0]][self._last_step[1]].hide()
+        if value < 0:
+            self.main_step -= 1
+            self._sub_step = len(self.step_list[self.main_step])-1
+        elif value > len(self.step_list[self.main_step])-1:
+            self.main_step += 1
+            self._sub_step = 0
+        else:
+            self._sub_step = value
+        self.progress_bar["value"] = self._main_step
+        self._last_step = [self._main_step,self._sub_step]
+        log('Show %d.%d'%(self._main_step,self._sub_step))
+        self.step_list[self._main_step][self._sub_step].show()
+
+    def start(self):
+        self.next_step(None)
+        self.top.mainloop()
+
+    def stop(self):
+        quit()
+
+    def busy_check(self):
+        if busy:
+            busy_note = Notification(
+                'This step is not finished, please wait.',
+                n_type='message')
+            busy_note.start()
+            return True
+        else:
+            return False
+
+    def finish_step(self, ev):
+        if self.busy_check():
+            return False
+        if self.main_step == len(self.step_list)-1:
+            self.stop()
+        else:
+            self.main_step = len(self.step_list)-1
+            self.sub_step = 0
+
+    def skip_step(self, ev):
+        if self.busy_check():
+            return False
+        self.main_step += 1
+        self.sub_step = 0
+
+    def next_step(self, ev):
+        if self.busy_check():
+            return False
+        self.sub_step += 1
+
+    def prev_step(self, ev):
+        if self.busy_check():
+            return False
+        self.sub_step -= 1
+
+def main():
+    PMI = PiMirror_installer()
+    PMI.start()
+
+if __name__ == '__main__':
+    main()

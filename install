@@ -1,24 +1,10 @@
 #!/bin/bash
 
-clear
-echo -e "     ╔═════════════════════════════════════════════════╗"
-echo -e "     ║                                                 ║"
-echo -e "     ║    ╔════╗       ╔═══╗             ╔═╗           ║"
-echo -e "     ║    ║╔═╗ ║       ║╔══╝             ║ ║           ║"
-echo -e "     ║    ║╚═══╦╗╔═╦═══╣╚══╦═══╦╗╔═╦═══╦═╝ ╠═══╦══╗    ║"
-echo -e "     ║    ╚══╗ ║║║ ║╔╗ ║╔══╣╔╗ ║║║ ║╔╗ ║╔╗ ║ ══╣╔═╝    ║"
-echo -e "     ║    ║╚═╝ ║╚╝ ║║║ ║║  ║╚╝ ║╚╝ ║║║ ║╚╝ ║ ══╣║      ║"
-echo -e "     ║    ╚════╩═══╩╝╚═╩╝  ╚═══╩═══╩╝╚═╩═══╩═══╩╝      ║"
-echo -e "     ║                                                 ║"
-echo -e "     ╚═════════════════════════════════════════════════╝"
-echo -e ''
-echo -e "               ╔════════════════════════════╗"
-echo -e "               ║ Mirror installation script ║"
-echo -e "               ╚════════════════════════════╝"
-echo -e ''
-sleep 2s
+if [ "$(whoami)" != "root" ] ; then
+    echo -e "You must run this script as root."
+    exit 0
+fi
 
-is_apt_get_updated='Skiped'
 is_pip_installed='Skiped'
 is_setuptools_installed='Skiped'
 is_google_assistant_installed='Skiped'
@@ -33,53 +19,6 @@ is_audio_set='Skiped'
 is_autostart_set='Skiped'
 is_screen_rotation_set='Skiped'
 is_weather_api_set='Skiped'
-
-if [ "$(whoami)" != "root" ] ; then
-    echo -e "You must run this script as root."
-    exit 0
-fi
-
-echo -e "Setup google account"
-echo -e "    1. Go to the Google Projects page, right click on this link https://console.cloud.google.com/project, Copy URL, and paste it on the browser. Login your Google account or create one. Then, create a new project."
-read -p "    When you are done, come back here and hit enter to continue."
-echo -e ""
-echo -e '    2. Go to Google API console, right click on this link https://console.developers.google.com/apis/api/embeddedassistant.googleapis.com/overview and selected project you just created. Click Library, search "assistant", click the bottom Google Assistant API, and click Enable.'
-read -p "    When you are done, come back here and hit enter to continue."
-echo -e ""
-echo -e '    3. Create an OAuth Client ID with the following steps'
-echo -e '      a. click Credentials tab. Or click this to go to Google API Credentials https://console.developers.google.com/apis/credentials/oauthclient'
-echo -e '      b. You may need to set a product name for the product consent screen. On the OAuth consent screen tab, give the product a name and click Save.'
-echo -e '      c. Back to Credentials, click Create credentials, choose OAuth client ID'
-echo -e '      c. Click Other and give the client ID a name.'
-echo -e '      d. Click Create. A dialog box appears that shows you a client ID and secret. (No need to remember or save this, just close the dialog.)'
-echo -e '      e. Click the download icon (at the far right of screen) for the client ID to download the client secret JSON file (client_secret_<client-id>.json).'
-read -p "    When you are done, come back here and hit enter to continue."
-echo -e ""
-echo -e '    4. After downloaded, the client_secret_<client-id>.json may be under ~/Downloads. '
-echo -e '      a. Open File Manager, go to Downloads folder.'
-echo -e '      b. Check if there is one file named `client_secret_<...>.json`.'
-read -p "    When you are done, come back here and hit enter to continue."
-echo -e ""
-
-echo -e "Setup Dark Sky free weather api tocken"
-echo -e '    1. Go to Dark Sky API: https://darksky.net/dev/'
-echo -e '    2. LOG IN or SIGN UP, you will need to verified your account by email. When its done, Log in again'
-echo -e "    3. After you loged in, you can see Your Secret Key immediately. don't close the webpage, you will need it later."
-read -p "    When you are done, come back here and hit enter to continue."
-
-sleep 1s
-
-echo -e ""
-echo -e ""
-echo -e "Update apt-get list."
-echo -e "┗━ sudo apt-get update"
-if sudo apt-get update ; then
-    echo -e "   ┗━ Success"
-    is_apt_get_updated='Success'
-else
-    echo -e "   ┗━ Failed"
-    is_apt_get_updated='Failed'
-fi
 
 # install google assistant
 echo -e "Install google assistant."
@@ -246,9 +185,13 @@ if ls /home/pi/.config/google-oauthlib-tool/credentials.json ; then
     echo -e '   ┗━ Seem google account is already authorize, skip'
     is_google_auth='Success'
 else
-    echo -e "┗━ Find client_secret json file"
-    echo -e "   ┗━ ls /home/pi/Downloads/ | grep 'client_secret'"
-    client_secret=`ls /home/pi/Downloads/ | grep "client_secret"`
+	if [ "$1" == "" ] ; then
+    	echo -e "┗━ Find client_secret json file"
+    	echo -e "   ┗━ ls /home/pi/Downloads/ | grep 'client_secret'"
+    	client_secret=`ls /home/pi/Downloads/ | grep "client_secret"`
+    else:
+    	client_secret=$1
+    fi
     if [ "$client_secret" == "" ] ; then
         echo -e "   ┗━ Failed"
         is_google_auth='Failed'
@@ -267,31 +210,23 @@ fi
 
 echo -e ''
 echo -e "Setup Weather API"
-if grep -q "weather_api_token" /home/pi/SunFounder_PiMirror/samba_files/config.txt ; then
-    echo -e '   ┗━ Seem Weather API is already set, skip'
-    is_weather_api_set='Success'
+if [ "$2" == "" ] ; then
+    echo -e '   ┗━ No Weather API, skip'
+    is_weather_api_set='Skiped'
 else
-    read -p "Enter Your Dark Sky Secret Key:" token
-    if [ "$token" == "" ] ; then
-        echo -e "   ┗━ Skip"
-        is_weather_api_set='Skiped'
+    token="weather_api_token = "$2
+    if sudo echo $token >> /home/pi/SunFounder_PiMirror/samba_files/config.txt ; then
+        echo -e "   ┗━ Success"
+        is_weather_api_set='Success'
     else
-        token="weather_api_token = "$token
-        if sudo echo $token >> /home/pi/SunFounder_PiMirror/samba_files/config.txt ; then
-            echo -e "   ┗━ Success"
-            is_weather_api_set='Success'
-        else
-            echo -e "   ┗━ Failed"
-            is_weather_api_set='Failed'
-        fi
+        echo -e "   ┗━ Failed"
+        is_weather_api_set='Failed'
     fi
 fi
 
 echo -e ''
 echo -e ''
 echo -e "Summery:"
-echo -e "┗━ Basic:"
-echo -e "   ┗━ Apt get update "$is_apt_get_updated
 echo -e "┗━ Install:"
 echo -e "   ┗━ Google Assistant Library   "$is_google_assistant_installed
 echo -e "   ┗━ Google authorization tool  "$is_google_auth_installed
