@@ -42,7 +42,11 @@ class run_command(object):
     def execute(self):
         proc = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, shell=True)
         while True:
-            line = proc.stdout.readline().decode('ascii')
+            line = proc.stdout.readline()
+            try:
+                line = line.decode('ascii')
+            except:
+                pass
             if line != '':
                 #the real code does filtering here
                 output = line.rstrip()
@@ -339,7 +343,7 @@ class Step_4(Step_with_button):
             global busy
             busy = True
             self.message.config(text="Installing")
-            r = run_command("cd ~/SunFounder_PiMirror ; sudo ./install")
+            r = run_command("cd /home/pi/SunFounder_PiMirror ; sudo ./install")
             r.print_output = show_output
             r.when_failed = failed
             r.when_success = install_finished
@@ -352,7 +356,7 @@ class Step_4(Step_with_button):
             install_begin()
 
         self.message.config(text="Downloading from Github...")
-        r = run_command("cd ~/ ; git clone https://github.com/sunfounder/SunFounder_PiMirror.git")
+        r = run_command("cd /home/pi/ ; git clone https://github.com/sunfounder/SunFounder_PiMirror.git")
         r.print_output = show_output
         r.when_failed = failed
         r.when_success = download_success
